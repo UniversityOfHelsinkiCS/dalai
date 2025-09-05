@@ -15,7 +15,7 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           image: docker.io/toskakayttaja/dalai
-          tags: production,${{ github.sha }}
+          tags: ${{ github.sha }}
           containerfiles: ./Dockerfile
           build-args: |
             GIT_SHA=${{ github.sha }}       
