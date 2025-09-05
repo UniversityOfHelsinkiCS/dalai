@@ -17,6 +17,14 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build and push the Docker image
+        env:
+          IMAGE: toska/dalai
+          SHA: ${{ github.sha }}
         run: |-
-          docker build -t toska/dalai:$GITHUB_SHA .
-          docker push toska/dalai:$GITHUB_SHA
+          docker build -t $IMAGE:build .
+
+          docker tag $IMAGE:build $IMAGE:latest
+          docker tag $IMAGE:build $IMAGE:$SHA
+
+          docker push $IMAGE:latest
+          docker push $IMAGE:$SHA
