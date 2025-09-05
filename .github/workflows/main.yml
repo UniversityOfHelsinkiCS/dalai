@@ -14,7 +14,7 @@ jobs:
         id: build-image
         uses: redhat-actions/buildah-build@v2
         with:
-          image: docker.io/${{ secrets.DOCKER_HUB_USER }}/dalai
+          image: docker.io/toskakayttaja/dalai
           tags: production,${{ github.sha }}
           containerfiles: ./Dockerfile
           build-args: |
