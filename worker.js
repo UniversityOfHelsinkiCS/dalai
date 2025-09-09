@@ -107,7 +107,12 @@ const REDIS_PORT = process.env.REDIS_PORT
 const connection = {
   url: REDIS_HOST,
   port: REDIS_PORT,
+  tls: {
+    servername: REDIS_HOST,
+  },
 }
+
+console.log(REDIS_HOST)
 
 const QUEUE_NAME = process.env.LLAMA_SCAN_QUEUE || 'llama-scan-queue'
 const S3_HOST = process.env.S3_HOST || ''
