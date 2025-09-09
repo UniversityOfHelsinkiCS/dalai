@@ -101,10 +101,12 @@ function guessContentType(filePath) {
 
 // --- Config ---
 
-const REDIS_HOST = process.env.REDIS_URL
+const REDIS_HOST = process.env.REDIS_HOST
+const REDIS_PORT = process.env.REDIS_PORT
 
 const connection = {
-  url: REDIS_HOST
+  url: REDIS_HOST,
+  port: REDIS_PORT,
 }
 
 const QUEUE_NAME = process.env.LLAMA_SCAN_QUEUE || 'llama-scan-queue'
