@@ -212,7 +212,7 @@ const worker = new Worker(
 
   },
   {
-    redis: connection,
+    connection,
     concurrency: parseInt(process.env.WORKER_CONCURRENCY || '2', 10)
   }
 )
