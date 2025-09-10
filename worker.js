@@ -107,7 +107,7 @@ const CA = process.env.CA
 const CERT = process.env.CERT
 const KEY = process.env.KEY
 
-const redis = {
+const connection = {
   host: REDIS_HOST,
   port: REDIS_PORT,
   tls: {
@@ -212,7 +212,7 @@ const worker = new Worker(
 
   },
   {
-    redis,
+    redis: connection,
     concurrency: parseInt(process.env.WORKER_CONCURRENCY || '2', 10)
   }
 )
