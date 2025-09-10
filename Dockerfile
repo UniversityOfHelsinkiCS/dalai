@@ -21,4 +21,4 @@ EXPOSE 3000
 
 USER 1001
 
-CMD ["./run.sh"]
+CMD ["node", "worker.js"]
