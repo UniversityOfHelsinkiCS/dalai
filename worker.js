@@ -155,9 +155,9 @@ const worker = new Worker(
 
     const prefix = ensureTrailingSlash(outputPrefix || '')
 
-    const tempRoot = path.join(os.tmpdir(), `llama-scan-${randomId()}`)
-    const inputLocalPath = path.join(tempRoot, 'input', path.basename(s3Key))
-    const outputBaseDir = path.join(tempRoot, 'output')
+    const uploadsDir = path.resolve('./uploads')
+    const inputLocalPath = path.join(uploadsDir, 'input', path.basename(s3Key))
+    const outputBaseDir = path.join(uploadsDir, 'output')
     const outputTextDir = path.join(outputBaseDir, 'text')
 
     await fs.mkdir(path.dirname(inputLocalPath), { recursive: true })
@@ -200,7 +200,7 @@ const worker = new Worker(
       console.error('Failed uploading outputs to S3:', err)
       throw new Error(`Failed uploading outputs to s3://${outputBucket}/${prefix}: ${err.message || err}`)
     } finally {
-      try { await fs.rm(tempRoot, { recursive: true, force: true }) } catch { }
+      try { await fs.rm(uploadsDir, { recursive: true, force: true }) } catch { }
     }
 
     return {
