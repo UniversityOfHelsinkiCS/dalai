@@ -155,9 +155,11 @@ const worker = new Worker(
 
     const prefix = ensureTrailingSlash(outputPrefix || '')
 
+    const rand = randomId()
+
     const uploadsDir = path.resolve('./uploads')
-    const inputLocalPath = path.join(uploadsDir, 'input', path.basename(s3Key))
-    const outputBaseDir = path.join(uploadsDir, 'output')
+    const inputLocalPath = path.join(uploadsDir, rand)
+    const outputBaseDir = path.join(uploadsDir, rand, 'output')
     const outputTextDir = path.join(outputBaseDir, 'text')
 
     await fs.mkdir(path.dirname(inputLocalPath), { recursive: true })
