@@ -173,7 +173,7 @@ const worker = new Worker(
       throw new Error(`Failed to download s3://${s3Bucket}/${s3Key}: ${err.message || err}`)
     }
 
-    const llamaCmd = `llama-scan ${inputLocalPath} --output ${outputBaseDir} -u http://laama-svc:11434`
+    const llamaCmd = `llama-scan ${inputLocalPath} --output ${outputBaseDir} -u http://laama-svc:11434/api`
     try {
       const res = await execAsync(llamaCmd, { maxBuffer: 1024 * 1024 * 64 })
       if (res.stderr && res.stderr.trim()) {
