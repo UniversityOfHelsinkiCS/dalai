@@ -8,6 +8,7 @@ const crypto = require('crypto')
 const { S3Client, GetObjectCommand, PutObjectCommand } = require('@aws-sdk/client-s3')
 const { pipeline } = require('stream')
 const { createWriteStream, createReadStream } = require('fs')
+const Redis = require('ioredis')
 
 const execAsync = promisify(exec)
 const pipelineAsync = promisify(pipeline)
@@ -103,16 +104,20 @@ function guessContentType(filePath) {
 
 const REDIS_HOST = process.env.REDIS_HOST
 const REDIS_PORT = process.env.REDIS_PORT
+const CA = process.env.CA
+const CERT = process.env.CERT
+const KEY = process.env.KEY
 
-const connection = {
-  url: REDIS_HOST,
+const redis = new Redis({
+  host: REDIS_HOST,
   port: REDIS_PORT,
   tls: {
+    ca: CA,
+    cert: CERT,
+    key: KEY,
     servername: REDIS_HOST,
   },
-}
-
-console.log(REDIS_HOST)
+})
 
 const QUEUE_NAME = process.env.LLAMA_SCAN_QUEUE || 'llama-scan-queue'
 const S3_HOST = process.env.S3_HOST || ''
@@ -208,7 +213,7 @@ const worker = new Worker(
 
   },
   {
-    connection,
+    redis,
     concurrency: parseInt(process.env.WORKER_CONCURRENCY || '2', 10)
   }
 )
