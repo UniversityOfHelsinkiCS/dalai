@@ -8,7 +8,6 @@ const crypto = require('crypto')
 const { S3Client, GetObjectCommand, PutObjectCommand } = require('@aws-sdk/client-s3')
 const { pipeline } = require('stream')
 const { createWriteStream, createReadStream } = require('fs')
-const Redis = require('ioredis')
 
 const execAsync = promisify(exec)
 const pipelineAsync = promisify(pipeline)
@@ -108,7 +107,7 @@ const CA = process.env.CA
 const CERT = process.env.CERT
 const KEY = process.env.KEY
 
-const redis = new Redis({
+const redis = {
   host: REDIS_HOST,
   port: REDIS_PORT,
   tls: {
@@ -117,7 +116,7 @@ const redis = new Redis({
     key: KEY,
     servername: REDIS_HOST,
   },
-})
+}
 
 const QUEUE_NAME = process.env.LLAMA_SCAN_QUEUE || 'llama-scan-queue'
 const S3_HOST = process.env.S3_HOST || ''

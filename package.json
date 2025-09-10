@@ -2,7 +2,6 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.882.0",
     "bullmq": "^5.58.5",
-    "ioredis": "^5.7.0",
     "redis": "^5.8.2"
   }
 }
