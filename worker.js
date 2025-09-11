@@ -111,7 +111,7 @@ const KEY = process.env.KEY
 const connection = new Redis({
   host: REDIS_HOST,
   port: REDIS_PORT,
-  tls: {
+  tls: CA && {
     ca: CA,
     cert: CERT,
     key: KEY,
