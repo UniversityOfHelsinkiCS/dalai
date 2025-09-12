@@ -14,10 +14,4 @@ COPY . .
 
 RUN npm i
 
-RUN mkdir -p ./uploads && chmod 777 ./uploads
-
-RUN chmod 777 -R . 
-
-USER 1001
-
-CMD ["node", "worker.js"]
+CMD ["npm", "run", "dev"]

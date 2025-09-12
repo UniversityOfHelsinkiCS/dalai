@@ -104,19 +104,20 @@ function guessContentType(filePath) {
 
 const REDIS_HOST = process.env.REDIS_HOST
 const REDIS_PORT = process.env.REDIS_PORT
-const CA = process.env.CA
+const CA = process.env.CA || undefined
 const CERT = process.env.CERT
 const KEY = process.env.KEY
 
 const connection = new Redis({
   host: REDIS_HOST,
   port: REDIS_PORT,
-  tls: CA && {
-    ca: CA,
-    cert: CERT,
-    key: KEY,
-    servername: REDIS_HOST,
-  },
+  connectTimeout: 10000,
+  // tls: CA ? {
+  //   ca: CA,
+  //   cert: CERT,
+  //   key: KEY,
+  //   servername: REDIS_HOST,
+  // } : {},
 })
 
 const QUEUE_NAME = process.env.LLAMA_SCAN_QUEUE || 'llama-scan-queue'
@@ -173,7 +174,7 @@ const worker = new Worker(
       throw new Error(`Failed to download s3://${s3Bucket}/${s3Key}: ${err.message || err}`)
     }
 
-    const llamaCmd = `llama-scan ${inputLocalPath} --output ${outputBaseDir} -u ${process.env.LAAMA_URL}/api`
+    const llamaCmd = `llama-scan "${inputLocalPath}" --output "${outputBaseDir}" -u ${process.env.LAAMA_URL}`
     try {
       const res = await execAsync(llamaCmd, { maxBuffer: 1024 * 1024 * 64 })
       if (res.stderr && res.stderr.trim()) {
