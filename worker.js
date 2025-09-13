@@ -108,17 +108,26 @@ const CA = process.env.CA || undefined
 const CERT = process.env.CERT
 const KEY = process.env.KEY
 
-const connection = new Redis({
+
+let creds = {
   host: REDIS_HOST,
   port: REDIS_PORT,
-  connectTimeout: 10000,
-  // tls: CA ? {
-  //   ca: CA,
-  //   cert: CERT,
-  //   key: KEY,
-  //   servername: REDIS_HOST,
-  // } : {},
-})
+}
+
+
+if (CA !== undefined) {
+  creds = {
+    ...creds,
+    tls: {
+      ca: CA,
+      cert: CERT,
+      key: KEY,
+      servername: REDIS_HOST,
+    }
+  }
+}
+
+const connection = new Redis(creds)
 
 const QUEUE_NAME = process.env.LLAMA_SCAN_QUEUE || 'llama-scan-queue'
 const S3_HOST = process.env.S3_HOST || ''
