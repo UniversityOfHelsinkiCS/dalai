@@ -1,14 +1,13 @@
-const { Worker } = require('bullmq')
-const { exec } = require('child_process')
-const { promisify } = require('util')
-const path = require('path')
-const fs = require('fs/promises')
-const os = require('os')
-const crypto = require('crypto')
-const { S3Client, GetObjectCommand, PutObjectCommand } = require('@aws-sdk/client-s3')
-const { pipeline } = require('stream')
-const { createWriteStream, createReadStream } = require('fs')
-const Redis = require('ioredis')
+import { Worker } from 'bullmq'
+import { exec } from 'node:child_process'
+import { promisify } from 'node:util'
+import path from 'node:path'
+import fs from 'node:fs/promises'
+import crypto from 'node:crypto'
+import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
+import { pipeline } from 'node:stream'
+import { createWriteStream, createReadStream } from 'node:fs'
+import Redis from 'ioredis'
 
 const execAsync = promisify(exec)
 const pipelineAsync = promisify(pipeline)
@@ -44,11 +43,6 @@ async function getAllTxtFilesAsObject(dir) {
 
 function randomId(n = 8) {
   return crypto.randomBytes(n).toString('hex')
-}
-
-function ensureTrailingSlash(prefix) {
-  if (!prefix) return ''
-  return prefix.endsWith('/') ? prefix : `${prefix}/`
 }
 
 async function downloadS3ToFile(s3, bucket, key, destPath) {
@@ -153,8 +147,9 @@ const worker = new Worker(
       s3Bucket,
       s3Key,
       outputBucket,
-      outputPrefix // optional
     } = job.data || {}
+
+    console.log(`Processing job ${job.id}`)
 
     if (!s3Bucket || !s3Key) {
       throw new Error('s3Bucket and s3Key are required in job data')
@@ -162,8 +157,6 @@ const worker = new Worker(
     if (!outputBucket) {
       throw new Error('outputBucket is required in job data')
     }
-
-    const prefix = ensureTrailingSlash(outputPrefix || '')
 
     const rand = randomId()
 
@@ -186,12 +179,12 @@ const worker = new Worker(
     const llamaCmd = `llama-scan "${inputLocalPath}" --output "${outputBaseDir}" -u ${process.env.LAAMA_URL}`
     try {
       const res = await execAsync(llamaCmd, { maxBuffer: 1024 * 1024 * 64 })
-      if (res.stderr && res.stderr.trim()) {
+      if (res.stderr?.trim()) {
         console.warn('llama-scan stderr:', res.stderr)
       }
     } catch (err) {
       try { await fs.unlink(inputLocalPath) } catch { }
-      throw new Error(`llama-scan failed: ${err.stderr || err.message || err}`)
+      throw new Error(`llama-scan failed. Err: ${err.stderr || err.message || err}\nStdout: ${err.stdout || ''}`)
     }
 
     let textData = {}
@@ -205,21 +198,20 @@ const worker = new Worker(
     try {
       const files = (await pathExists(outputBaseDir)) ? await walkDir(outputBaseDir) : []
       for (const filePath of files) {
-        const rel = path.relative(outputBaseDir, filePath).split(path.sep).join('/')
-        const key = `${prefix}${rel}`
+        const key = path.relative(outputBaseDir, filePath).split(path.sep).join('/')
         await uploadFileToS3(s3, outputBucket, key, filePath, guessContentType(filePath))
         uploadedKeys.push(key)
       }
     } catch (err) {
       console.error('Failed uploading outputs to S3:', err)
-      throw new Error(`Failed uploading outputs to s3://${outputBucket}/${prefix}: ${err.message || err}`)
+      throw new Error(`Failed uploading outputs to s3://${outputBucket}: ${err.message || err}`)
     } finally {
-      try { await fs.rm(uploadsDir, { recursive: true, force: true }) } catch { }
+      // try { await fs.rm(uploadsDir, { recursive: true, force: true }) } catch { }
     }
 
     return {
       input: { bucket: s3Bucket, key: s3Key },
-      output: { bucket: outputBucket, prefix },
+      output: { bucket: outputBucket },
       uploadedCount: uploadedKeys.length,
       uploadedKeys,
       textData
@@ -228,12 +220,14 @@ const worker = new Worker(
   },
   {
     connection,
-    concurrency: parseInt(process.env.WORKER_CONCURRENCY || '2', 10)
+    concurrency: parseInt(process.env.WORKER_CONCURRENCY || '2', 10),
   }
 )
 
+console.log(`Worker started. Listening to queue "${QUEUE_NAME}"...`)
+
 worker.on('completed', (job, result) => {
-  console.log(`Job ${job.id} completed.Uploaded ${result?.uploadedCount || 0} files to s3://${result?.output?.bucket}/${result?.output?.prefix}`)
+  console.log(`Job ${job.id} completed.Uploaded ${result?.uploadedCount || 0} files to s3://${result?.output?.bucket}`)
 })
 
 worker.on('failed', (job, err) => {
@@ -247,5 +241,3 @@ async function shutdown() {
 }
 process.on('SIGINT', shutdown)
 process.on('SIGTERM', shutdown)
-
-module.exports = { worker }
