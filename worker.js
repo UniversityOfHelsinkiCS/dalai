@@ -1,7 +1,6 @@
 import { Worker } from 'bullmq'
 import path from 'node:path'
 import fs from 'node:fs/promises'
-import crypto from 'node:crypto'
 import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
 import { pipeline } from 'node:stream'
 import { createWriteStream, createReadStream } from 'node:fs'
@@ -16,9 +15,6 @@ dotenv.config()
 
 const pipelineAsync = promisify(pipeline)
 
-function randomId(n = 8) {
-  return crypto.randomBytes(n).toString('hex')
-}
 
 async function downloadS3ToFile(s3, bucket, key, destPath) {
   const res = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }))
@@ -27,7 +23,7 @@ async function downloadS3ToFile(s3, bucket, key, destPath) {
 }
 
 async function uploadFileToS3(s3, bucket, key, filePath, contentType) {
-  const Body = createReadStream(filePath)
+  const Body = fs.readFile(filePath)
   await s3.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body, ContentType: contentType }))
 }
 
@@ -38,23 +34,6 @@ async function pathExists(p) {
   } catch {
     return false
   }
-}
-
-async function walkDir(rootDir) {
-  const out = []
-  async function walk(dir) {
-    const entries = await fs.readdir(dir, { withFileTypes: true })
-    for (const e of entries) {
-      const full = path.join(dir, e.name)
-      if (e.isDirectory()) {
-        await walk(full)
-      } else if (e.isFile()) {
-        out.push(full)
-      }
-    }
-  }
-  await walk(rootDir)
-  return out
 }
 
 function guessContentType(filePath) {
