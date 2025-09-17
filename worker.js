@@ -135,9 +135,9 @@ const worker = new Worker(
       throw new Error('outputBucket is required in job data')
     }
 
-    const jobIdPath = job.id.replaceAll('\/','_')
+    const jobIdPath = job.id.replaceAll('\/', '_')
 
-    const uploadsDir = '/uploads'
+    const uploadsDir = './uploads'
     const jobRootDir = path.join(uploadsDir, jobIdPath)
     const inputFileName = path.basename(s3Key) || 'input.bin'
     const inputLocalPath = path.join(jobRootDir, inputFileName)
@@ -168,28 +168,28 @@ const worker = new Worker(
       // Change the callback so it builds a list of JSON objects, separated by newlines.
       // This seems a bit hacky but I couldn't get any simpler way to work.
       function pagerender(pageData) {
-       	//check documents https://mozilla.github.io/pdf.js/
-       	let render_options = {
-      		//replaces all occurrences of whitespace with standard spaces (0x20). The default value is `false`.
-      		normalizeWhitespace: false,
-      		//do not attempt to combine same line TextItem's. The default value is `false`.
-      		disableCombineTextItems: false,
-       	};
+        //check documents https://mozilla.github.io/pdf.js/
+        let render_options = {
+          //replaces all occurrences of whitespace with standard spaces (0x20). The default value is `false`.
+          normalizeWhitespace: false,
+          //do not attempt to combine same line TextItem's. The default value is `false`.
+          disableCombineTextItems: false,
+        };
 
-       	return pageData.getTextContent(render_options).then((textContent) => {
+        return pageData.getTextContent(render_options).then((textContent) => {
           let lastY;
           let text = '';
-      		for (let item of textContent.items) {
-       			if (lastY == item.transform[5] || !lastY) {
-      				text += item.str;
-       			} else {
-          		text += "\n" + item.str;
-       			}
-       			lastY = item.transform[5];
-      		}
+          for (let item of textContent.items) {
+            if (lastY == item.transform[5] || !lastY) {
+              text += item.str;
+            } else {
+              text += "\n" + item.str;
+            }
+            lastY = item.transform[5];
+          }
 
-      		return `${JSON.stringify({ text, pageNumber: pageData.pageNumber })}\n`;
-       	});
+          return `${JSON.stringify({ text, pageNumber: pageData.pageNumber })}\n`;
+        });
       }
 
       const pages = {}
