@@ -23,7 +23,7 @@ async function downloadS3ToFile(s3, bucket, key, destPath) {
 }
 
 async function uploadFileToS3(s3, bucket, key, filePath, contentType) {
-  const Body = fs.readFile(filePath)
+  const Body = await fs.readFile(filePath)
   await s3.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body, ContentType: contentType }))
 }
 
