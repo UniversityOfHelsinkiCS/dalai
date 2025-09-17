@@ -251,7 +251,7 @@ const worker = new Worker(
               },
               body: JSON.stringify({
                 model: 'qwen2.5vl:7b',
-                system: 'Your task is to transcribe the content of a PDF page given to you as an image. You are also given the text extracted from the PDF using a PDF parser. Your task is to combine these two sources of information to produce the most accurate transcription possible. When there are discrepancies between the image transcription and the PDF text, prioritize the parsed PDF text.',
+                system: 'Your task is to transcribe the content of a PDF page given to you as an image. If the given PDF page contains an image, or a diagram, describe it in detail. Enclose the description in an **image** tag. For example: **image** This is an image of a cat. **image**.You are also given the text extracted from the PDF using a PDF parser. Your task is to combine these two sources of information to produce the most accurate transcription possible. When there are discrepancies between the image transcription and the PDF text, prioritize the parsed PDF text. But you are always obligated to keep the **image** tags intact.',
                 prompt: `Parsed PDF text:\n${pdfText}\n\nImage transcription:`,
                 stream: false,
                 images: [image.toString('base64')]
