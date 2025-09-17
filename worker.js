@@ -341,7 +341,7 @@ const worker = new Worker(
         output: { bucket: outputBucket },
       }
     } finally {
-      // try { await fs.rm(jobRootDir, { recursive: true, force: true }) } catch { }
+      try { await fs.rm(jobRootDir, { recursive: true, force: true }) } catch { }
     }
   },
   {
