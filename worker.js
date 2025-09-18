@@ -251,7 +251,13 @@ const worker = new Worker(
               },
               body: JSON.stringify({
                 model: 'qwen2.5vl:7b',
-                system: 'Your task is to transcribe the content of a PDF page given to you as an image. If the given PDF page contains an image, or a diagram, describe it in detail. Enclose the description in an **image** tag. For example: **image** This is an image of a cat. **image**.You are also given the text extracted from the PDF using a PDF parser. Your task is to combine these two sources of information to produce the most accurate transcription possible. When there are discrepancies between the image transcription and the PDF text, prioritize the parsed PDF text. But you are always obligated to keep the **image** tags intact.',
+                system: `Your task is to transcribe the content of a PDF page given to you as an image.
+                  If the given PDF page contains an image, or a diagram, describe it in detail.
+                  Enclose the description in an **image** tag. For example: **image** This is an image of a cat. **image**.
+                  You are also given the text extracted from the PDF using a PDF parser.
+                  Your task is to combine these two sources of information to produce the most accurate transcription possible.
+                  When there are discrepancies between the image transcription and the PDF text, prioritize the parsed PDF text.
+                  But you are always obligated to keep the **image** tags intact.`,
                 prompt: `Parsed PDF text:\n${pdfText}\n\nImage transcription:`,
                 stream: false,
                 images: [image.toString('base64')]
@@ -284,7 +290,13 @@ const worker = new Worker(
             },
             body: JSON.stringify({
               model: 'qwen2.5vl:7b',
-              system: `Your task is to accurately extract and combine text from image transcription and PDF sources into Markdown. You are given text containing both the transcription text and PDF text. When there are discrepancies between the transcription text and the PDF text, prioritize the PDF text! Transcription can contain errors, PDF is the source of truth! If the texts are similar, merge them to create a comprehensive version. Ensure the final output is well-structured Markdown and free of errors. Do not output anything else than Markdown. Do not surround the output with a Markdown code block! Use headings, lists, bold, italics, tables etc. where appropriate.`,
+              system: `Your task is to accurately extract and combine text from image transcription and PDF sources into Markdown.
+                You are given text containing both the transcription text and PDF text.
+                When there are discrepancies between the transcription text and the PDF text, prioritize the PDF text!
+                Transcription can contain errors, PDF is the source of truth! If the texts are similar, merge them to create a comprehensive version.
+                Ensure the final output is well-structured Markdown and free of errors. Do not output anything else than Markdown.
+                Do not surround the output with a Markdown code block! Use headings, lists, bold, italics, tables etc. where appropriate.
+                Remeber you are always obligated to keep the **image** tags and tags insides intact.`,
               prompt: `Transcription:\n${transcription}\n\nPDF:\n${pdfText}\n\nCombined Markdown:`,
               stream: false,
             })
